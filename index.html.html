@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CVT Transfer Ready | Real-time Clinical Dashboard</title>
+<style>
+:root{--navy:#123a56;--blue:#176b87;--teal:#168f7b;--bg:#f3f7fa;--card:#fff;--line:#d9e5ec;--text:#18344b;--muted:#647b8d;--green:#1f9964;--yellow:#d79a17;--red:#c94a4a;--softblue:#eaf5f8}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,"Noto Sans Thai",Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(135deg,#123a56,#176b87,#168f7b);color:#fff;padding:24px}.wrap{max-width:1180px;margin:auto}.brand{display:flex;justify-content:space-between;gap:20px;align-items:center}.brand h1{margin:0 0 6px;font-size:29px}.brand p{margin:0;opacity:.92}.badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);padding:8px 12px;border-radius:999px;font-size:13px}
+nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}.nav{max-width:1180px;margin:auto;display:flex;gap:6px;padding:8px;overflow:auto}.nav button{border:0;background:transparent;padding:11px 14px;border-radius:8px;color:var(--text);font:inherit;cursor:pointer}.nav button.active{background:#e6f2f5;color:var(--blue);font-weight:700}
+main{padding:22px 0 50px}.notice{background:#eef8fb;border-left:5px solid var(--blue);padding:13px 15px;border-radius:8px;margin-bottom:16px}.warning{background:#fff7e5;border-left-color:var(--yellow)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 4px 15px rgba(15,48,70,.05);margin-bottom:16px}h2{font-size:21px;margin:22px 0 12px}h3{margin:0 0 10px}.form{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}input,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;background:#fff;color:var(--text)}
+.dashboard{display:grid;grid-template-columns:1.2fr repeat(5,1fr);gap:12px;margin-bottom:16px}.metric{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;min-height:116px}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-size:30px;font-weight:800;margin:6px 0}.metric .mini{font-size:12px;color:var(--muted)}.metric.overall{border-width:2px}.metric.green{border-color:#8bd4b3;background:#eefaf4}.metric.yellow{border-color:#f2cf75;background:#fff9e9}.metric.red{border-color:#efabab;background:#fff1f1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin:8px 0 16px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.g{background:var(--green)}.y{background:var(--yellow)}.r{background:var(--red)}
+.progress{height:18px;background:#e4edf2;border-radius:999px;overflow:hidden}.bar{height:100%;width:0;background:var(--teal);transition:.25s}.result{margin-top:10px;padding:14px;border-radius:10px;font-weight:700}.result.green{background:#e6f7ef;color:#14754c}.result.yellow{background:#fff5dc;color:#966800}.result.red{background:#fde9e9;color:#9b3030}
+.checklist-grid{display:grid;grid-template-columns:1fr;gap:14px}.section-title{display:flex;align-items:center;gap:10px}.section-key{display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:9px;background:var(--blue);color:#fff;font-weight:800}.section-count{margin-left:auto;font-size:12px;color:var(--muted)}.checkrow{display:grid;grid-template-columns:1fr 360px;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}.checkrow:last-child{border-bottom:0}.opts{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}.choice{border:1px solid var(--line);border-radius:8px;padding:7px 9px;color:var(--text);margin:0;cursor:pointer;background:#fff}.choice input{width:auto;margin-right:4px}.choice:has(input[value="1"]:checked){background:#e6f7ef;border-color:#8bd4b3;color:#14754c}.choice:has(input[value="0"]:checked){background:#fde9e9;border-color:#efabab;color:#9b3030}.choice:has(input[value="NA"]:checked){background:#eef2f5;color:#5d6f7d}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:9px;padding:10px 15px;cursor:pointer;font:inherit}.primary{background:var(--blue);color:#fff}.teal{background:var(--teal);color:#fff}.secondary{background:#e7eef3;color:var(--text)}.danger{background:#f3dddd;color:#8e2d2d}.summary{white-space:pre-wrap;background:#f8fbfd;border:1px solid var(--line);padding:15px;border-radius:9px;min-height:180px}.hidden{display:none}.action-list{margin:0;padding-left:22px}.empty{color:var(--muted)}
+footer{text-align:center;color:var(--muted);padding:25px}
+@media(max-width:1000px){.dashboard{grid-template-columns:repeat(3,1fr)}.form{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.dashboard,.form{grid-template-columns:1fr}.brand{align-items:flex-start;flex-direction:column}.brand h1{font-size:23px}.checkrow{grid-template-columns:1fr}.opts{justify-content:flex-start}}
+@media print{header,nav,.actions,.notice{display:none!important}.card,.metric{box-shadow:none}.dashboard{grid-template-columns:repeat(3,1fr)}body{background:#fff}}
+
+.guide-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.guide-step{background:#f8fbfd;border:1px solid var(--line);border-radius:12px;padding:16px}
+.guide-step b{color:var(--blue)}
+.guide-num{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--blue);color:#fff;font-weight:700;margin-right:8px}
+.guide-table{width:100%;border-collapse:collapse;margin-top:10px}
+.guide-table th,.guide-table td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}
+.guide-table th{background:#eef6f9}
+.tip{background:#eefaf4;border-left:5px solid var(--green);padding:13px 15px;border-radius:8px;margin:12px 0}
+@media(max-width:700px){.guide-grid{grid-template-columns:1fr}}
+
+
+.aggregate-dashboard{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.aggregate-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;box-shadow:0 4px 15px rgba(15,48,70,.05)}
+.aggregate-card .a-label{font-size:12px;color:var(--muted)}
+.aggregate-card .a-value{font-size:30px;font-weight:800;margin:6px 0}
+.aggregate-card.green{background:#eefaf4;border-color:#8bd4b3}
+.aggregate-card.yellow{background:#fff9e9;border-color:#f2cf75}
+.aggregate-card.red{background:#fff1f1;border-color:#efabab}
+.aggregate-card.blue{background:#eef8fb;border-color:#9ccedb}
+.records-wrap{overflow:auto}
+.records-table{width:100%;border-collapse:collapse;min-width:980px}
+.records-table th,.records-table td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
+.records-table th{background:#f3f8fa;position:sticky;top:0}
+.badge-status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge-status.green{background:#e6f7ef;color:#14754c}
+.badge-status.yellow{background:#fff5dc;color:#966800}
+.badge-status.red{background:#fde9e9;color:#9b3030}
+.small-btn{border:0;border-radius:7px;padding:6px 9px;cursor:pointer;font:inherit;font-size:12px}
+.toast{position:fixed;right:18px;bottom:18px;background:#18344b;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:99;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}
+.toast.show{opacity:1;transform:translateY(0)}
+.filter-group{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.filter-label{font-weight:700;margin-right:3px}.filter-btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:999px;padding:9px 13px;cursor:pointer;font:inherit}.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+@media(max-width:1000px){.aggregate-dashboard{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.aggregate-dashboard{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<header><div class="wrap brand"><div><h1>CVT Transfer Ready</h1><p>Real-time Nursing Clinical Decision Support • ICU CVT → Ward</p></div><div class="badge">CVT-READY Model • Presentation Prototype</div></div></header>
+<nav><div class="nav"><button class="active" data-tab="clinical">Clinical Tool</button><button data-tab="dashboard">Dashboard</button><button data-tab="summaryTab">Transfer Summary</button><button data-tab="researchDashboard">Research Dashboard</button><button data-tab="guide">คู่มือการใช้งาน</button></div></nav>
+<main class="wrap">
+<section id="clinical">
+<div class="notice"><b>วัตถุประสงค์:</b> สนับสนุนพยาบาลในการประเมินความพร้อมก่อนย้ายผู้ป่วยหลังผ่าตัดหัวใจจาก ICU CVT ไป Ward โดยระบบคำนวณคะแนนและแสดงผลแบบ Real-time</div>
+<div class="notice warning"><b>Prototype:</b> ใช้เพื่อสาธิตแนวคิดและสนับสนุนกระบวนการพยาบาล ไม่แทนคำสั่งแพทย์หรือการตัดสินใจทางคลินิก</div>
+<h2>1. Patient & Assessment</h2>
+<div class="card"><div class="form">
+<div><label for="pid">Study ID</label><input id="pid" placeholder="CVT-001"></div>
+<div><label for="age">อายุ</label><input id="age" type="number" min="0"></div>
+<div><label for="sex">เพศ</label><select id="sex"><option>ชาย</option><option>หญิง</option><option>อื่น ๆ</option></select></div>
+<div><label for="surgery">ประเภทการผ่าตัด</label><select id="surgery"><option>CABG</option><option>Valve Surgery</option><option>Combined Surgery</option><option>Other Cardiac Surgery</option></select></div>
+<div><label for="surgeryDate">วันที่ผ่าตัด</label><input id="surgeryDate" type="date"></div>
+<div><label for="assessDate">วันที่ประเมิน</label><input id="assessDate" type="date"></div>
+<div><label for="transferDate">วันที่คาดว่าจะย้าย</label><input id="transferDate" type="date"></div>
+<div><label for="ward">หอผู้ป่วยปลายทาง</label><input id="ward" placeholder="CVT Ward"></div>
+<div><label for="nurseId">รหัสผู้ประเมิน</label><input id="nurseId" placeholder="N-001"></div>
+</div></div>
+<h2>2. คะแนนความพร้อมปัจจุบัน</h2>
+<div class="card"><div><b>คะแนนความพร้อมรวม:</b> <span id="score">0%</span> <span id="answered" class="empty">(0/20 ข้อ)</span></div><div class="progress"><div id="bar" class="bar"></div></div><div id="status" class="result yellow" aria-live="polite">ยังไม่ได้ประเมิน</div></div>
+<h2>3. CVT-READY Clinical Checklist</h2><div class="notice">หัวข้อ R–E–A–D–Y แสดงครบในหน้าเดียว สามารถกดเปลี่ยนคำตอบได้ทันทีโดยไม่ต้องรีเฟรชหน้าเว็บ</div><div id="clinicalList" class="checklist-grid"></div>
+<h2>4. Action Needed</h2><div class="card"><ul id="actionsList" class="action-list"><li class="empty">เริ่มประเมินเพื่อดูประเด็นที่ต้องติดตาม</li></ul></div>
+<div class="actions"><button class="btn primary" id="saveRecordBtn">บันทึกข้อมูลผู้ป่วย</button><button class="btn teal" id="summaryBtn">สร้างสรุปส่งต่อ</button><button class="btn secondary" id="printBtn">พิมพ์ / PDF</button><button class="btn danger" id="resetBtn">ล้างข้อมูล</button></div>
+</section>
+<section id="dashboard" class="hidden"><h2>Real-time Readiness Dashboard</h2><div class="notice">ข้อมูลผู้ป่วยและผลประเมิน R–E–A–D–Y ถูกรวมไว้ใน Dashboard เดียว และอัปเดตทันทีเมื่อเปลี่ยนคำตอบใน Clinical Checklist</div><div class="card"><div class="form"><div><label>Study ID</label><b id="dashPid">-</b></div><div><label>ประเภทการผ่าตัด</label><b id="dashSurgery">-</b></div><div><label>วันที่ประเมิน</label><b id="dashAssessDate">-</b></div><div><label>หอผู้ป่วยปลายทาง</label><b id="dashWard">-</b></div><div><label>ผู้ประเมิน</label><b id="dashNurse">-</b></div></div></div><div id="dashboardLarge" class="dashboard"></div><div class="legend"><span><i class="dot g"></i>พร้อม ≥ 85%</span><span><i class="dot y"></i>เตรียมเพิ่มเติม 60–84%</span><span><i class="dot r"></i>ยังไม่พร้อม &lt; 60%</span></div><div class="card"><h3>Interpretation</h3><div id="dashboardInterpretation" class="result yellow">ยังไม่ได้ประเมิน</div><h3 style="margin-top:18px">ประเด็นที่ต้องดำเนินการก่อนย้าย</h3><ul id="dashboardActions" class="action-list"></ul></div></section>
+<section id="summaryTab" class="hidden"><h2>Transfer Summary</h2><div class="card"><div id="summary" class="summary">ระบบจะสร้างสรุปอัตโนมัติจากข้อมูลล่าสุด</div><div class="actions"><button class="btn primary" id="refreshSummary">อัปเดตสรุป</button><button class="btn secondary" id="printSummary">พิมพ์ / PDF</button></div></div></section>
+
+
+<section id="researchDashboard" class="hidden">
+  <h2>Research / Data Collection Dashboard</h2>
+  <div class="notice">
+    หน้านี้สรุปข้อมูลผู้ป่วยที่กด “บันทึกข้อมูลผู้ป่วย” ใน Web App นี้ เพื่อให้ทราบจำนวนตัวอย่างที่เก็บแล้วและภาพรวมความพร้อมก่อนย้าย
+  </div>
+
+  <div id="aggregateDashboard" class="aggregate-dashboard"></div>
+
+  <div class="card">
+    <div class="actions" style="margin-top:0;justify-content:space-between;align-items:center">
+      <div class="filter-group" id="periodFilters" aria-label="เลือกช่วงเวลาข้อมูล">
+        <span class="filter-label">ช่วงเวลา:</span>
+        <button class="filter-btn active" data-period="month">เดือนนี้</button>
+        <button class="filter-btn" data-period="today">วันนี้</button>
+        <button class="filter-btn" data-period="7days">7 วันที่ผ่านมา</button>
+        <button class="filter-btn" data-period="all">ทั้งหมด</button>
+      </div>
+      <div class="actions" style="margin-top:0">
+      <button class="btn teal" id="exportCsvBtn">ดาวน์โหลดข้อมูล CSV</button>
+      <button class="btn secondary" id="refreshRecordsBtn">รีเฟรช Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>รายการข้อมูลที่บันทึกแล้ว</h3>
+    <div id="recordsEmpty" class="empty">ยังไม่มีข้อมูลที่บันทึก</div>
+    <div class="records-wrap">
+      <table class="records-table" id="recordsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Study ID</th>
+            <th>วันที่ประเมิน</th>
+            <th>ผ่าตัด</th>
+            <th>Overall</th>
+            <th>R</th><th>E</th><th>A</th><th>D</th><th>Y</th>
+            <th>สถานะ</th>
+            <th>ผู้ประเมิน</th>
+            <th>บันทึกเมื่อ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="guide" class="hidden">
+  <h2>คู่มือการใช้งาน CVT Transfer Ready</h2>
+  <div class="notice">
+    <b>สำหรับผู้ใช้งาน:</b> เครื่องมือนี้ช่วยพยาบาลประเมินความพร้อมก่อนย้ายผู้ป่วยหลังผ่าตัดหัวใจจาก ICU CVT ไป Ward
+    โดยคำนวณคะแนนและแสดงผลแบบ Real-time จาก Clinical Checklist จำนวน 20 ข้อ
+  </div>
+  <div class="notice warning">
+    <b>ข้อควรทราบ:</b> ระบบนี้เป็น Prototype เพื่อสนับสนุนกระบวนการพยาบาล ไม่ใช้แทนคำสั่งแพทย์
+    เกณฑ์ทางคลินิกของหน่วยงาน หรือการตัดสินใจของทีมสหสาขาวิชาชีพ
+  </div>
+
+  <div class="card">
+    <h3>วิธีใช้งานแบบง่าย 6 ขั้นตอน</h3>
+    <div class="guide-grid">
+      <div class="guide-step"><span class="guide-num">1</span><b>กรอกข้อมูลผู้ป่วย</b><br>กรอก Study ID อายุ เพศ ประเภทและวันที่ผ่าตัด วันที่ประเมิน วันที่คาดว่าจะย้าย หอผู้ป่วยปลายทาง และรหัสผู้ประเมิน</div>
+      <div class="guide-step"><span class="guide-num">2</span><b>ประเมิน Clinical Checklist</b><br>หัวข้อ R, E, A, D และ Y แสดงครบในหน้าเดียว ตอบแต่ละข้อว่า “พร้อม”, “ยังไม่พร้อม” หรือ “N/A” และกดเปลี่ยนคำตอบได้ทันทีหากเลือกผิด โดยไม่ต้องรีเฟรช</div>
+      <div class="guide-step"><span class="guide-num">3</span><b>ดูคะแนน Real-time</b><br>เมื่อเลือกคำตอบ ระบบจะคำนวณ Overall Readiness และคะแนนรายด้านทันที พร้อมแสดงจำนวนข้อที่ประเมินแล้ว</div>
+      <div class="guide-step"><span class="guide-num">4</span><b>ตรวจ Action Needed</b><br>ข้อที่เลือก “ยังไม่พร้อม” จะถูกรวบรวมอัตโนมัติ เพื่อช่วยให้ทีมเห็นประเด็นที่ควรจัดการก่อนย้าย</div>
+      <div class="guide-step"><span class="guide-num">5</span><b>ดู Dashboard / Transfer Summary</b><br>กดเมนู Dashboard เพื่อดูภาพรวม หรือกด “สร้างสรุปส่งต่อ” เพื่อสร้างข้อมูลสำหรับการส่งต่อผู้ป่วย</div>
+      <div class="guide-step"><span class="guide-num">6</span><b>พิมพ์หรือเริ่มรายใหม่</b><br>ใช้ปุ่ม “พิมพ์ / PDF” เมื่อต้องการเก็บสรุป และใช้ “ล้างข้อมูล” เมื่อจะเริ่มประเมินผู้ป่วยรายใหม่</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ความหมายของ CVT-READY</h3>
+    <table class="guide-table">
+      <tr><th>ด้าน</th><th>ความหมาย</th><th>สิ่งที่ประเมินโดยสรุป</th></tr>
+      <tr><td><b>R</b></td><td>Readiness Assessment</td><td>ความพร้อมทางคลินิก เช่น สัญญาณชีพ การหายใจ อาการผิดปกติ และความปวด</td></tr>
+      <tr><td><b>E</b></td><td>Education</td><td>ความรู้และความเข้าใจของผู้ป่วยเกี่ยวกับการย้าย การดูแลแผล การหายใจ/ไอ/เคลื่อนไหว และอาการเตือน</td></tr>
+      <tr><td><b>A</b></td><td>Active Family Participation</td><td>การได้รับข้อมูล ความเข้าใจบทบาท และการมีส่วนร่วมของครอบครัว</td></tr>
+      <tr><td><b>D</b></td><td>Data Continuity</td><td>ความครบถ้วนของข้อมูล แผนการดูแล การสื่อสารประเด็นเฝ้าระวัง ยา แผล ท่อ และสายระบาย</td></tr>
+      <tr><td><b>Y</b></td><td>Your Next-Care Plan</td><td>แผนการดูแลหลังย้าย คำแนะนำ สิ่งที่ต้องติดตาม และข้อมูลสรุปสำหรับทีมรับย้าย</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>การแปลผลคะแนน</h3>
+    <table class="guide-table">
+      <tr><th>สี</th><th>คะแนน</th><th>ความหมายในระบบ</th></tr>
+      <tr><td>🟢 เขียว</td><td>≥ 85%</td><td>พร้อมสำหรับการย้ายตามกระบวนการพยาบาล</td></tr>
+      <tr><td>🟡 เหลือง</td><td>60–84%</td><td>ควรเตรียมเพิ่มเติมก่อนย้าย</td></tr>
+      <tr><td>🔴 แดง</td><td>&lt; 60%</td><td>ยังมีประเด็นสำคัญที่ควรจัดการก่อนย้าย</td></tr>
+    </table>
+    <div class="tip"><b>คำแนะนำ:</b> ไม่ควรพิจารณาเฉพาะคะแนนรวม ให้ตรวจรายการ “Action Needed” และข้อมูลทางคลินิกของผู้ป่วยร่วมด้วยทุกครั้ง</div>
+  </div>
+
+  <div class="card">
+    <h3>ความหมายของตัวเลือกคำตอบ</h3>
+    <p><b>พร้อม</b> = ประเด็นนั้นผ่าน/มีความพร้อมตามข้อมูลที่ประเมินได้</p>
+    <p><b>ยังไม่พร้อม</b> = มีประเด็นที่ต้องติดตามหรือดำเนินการเพิ่มเติมก่อนย้าย และระบบจะแสดงใน Action Needed</p>
+    <p><b>N/A</b> = ไม่เกี่ยวข้องกับผู้ป่วยรายนั้น โดยระบบไม่นำข้อนั้นมาคิดในตัวหารของคะแนน</p>
+    <p><b>ยังไม่ได้ตอบ</b> = ระบบจะแสดงจำนวนข้อที่ประเมินแล้ว เพื่อให้ผู้ใช้ตรวจสอบความครบถ้วนก่อนสรุปผล</p>
+  </div>
+
+  <div class="card">
+    <h3>ข้อแนะนำก่อนนำไปใช้เก็บข้อมูลจริง</h3>
+    <p>ระบบเชื่อมต่อ Google Sheets เพื่อบันทึกผู้ป่วยหลายรายและแสดง Research Dashboard แล้ว ก่อนใช้งานจริงควรตรวจสอบสิทธิ์ของ Apps Script และทดลองบันทึกข้อมูลตัวอย่างอย่างน้อย 1 ราย</p>
+  </div>
+</section>
+
+</main>
+<footer>CVT Transfer Ready • Nursing Clinical Transition Support • Real-time Prototype</footer>
+<script>
+const clinicalData=[
+{key:'R',name:'R: Readiness Assessment',items:['สัญญาณชีพคงที่ตามเกณฑ์/แผนการรักษา','ไม่มีอาการผิดปกติสำคัญที่ต้องจัดการก่อนย้าย','การหายใจและออกซิเจนอยู่ในระดับเหมาะสม','ระดับความปวดได้รับการประเมินและจัดการเหมาะสม']},
+{key:'E',name:'E: Education',items:['ผู้ป่วยได้รับข้อมูลเกี่ยวกับการย้ายออกจาก ICU','ผู้ป่วยเข้าใจการดูแลแผลผ่าตัดเบื้องต้น','ผู้ป่วยเข้าใจการฝึกหายใจ ไอ และการเคลื่อนไหว','ผู้ป่วยเข้าใจอาการผิดปกติที่ควรแจ้งพยาบาล']},
+{key:'A',name:'A: Active Family Participation',items:['ครอบครัวได้รับข้อมูลเกี่ยวกับการย้าย','ครอบครัวเข้าใจบทบาทในการช่วยดูแล','ครอบครัวเข้าใจอาการผิดปกติที่ต้องเฝ้าระวัง','ครอบครัวมีโอกาสซักถามและได้รับคำตอบ']},
+{key:'D',name:'D: Data Continuity',items:['ข้อมูลสำคัญทางการพยาบาลบันทึกครบถ้วน','แผนการดูแลต่อเนื่องระบุชัดเจน','ประเด็นเฝ้าระวังหลังย้ายได้รับการสื่อสาร','ข้อมูลยา แผล ท่อ สายระบาย และข้อควรระวังได้รับการตรวจสอบ']},
+{key:'Y',name:'Y: Your Next-Care Plan',items:['มีแผนการดูแลต่อเนื่องหลังย้าย','มีคำแนะนำสำหรับผู้ป่วยและครอบครัว','มีรายการสิ่งที่ต้องติดตามต่อใน Ward','มีข้อมูลสรุปสำหรับทีมรับย้าย']}
+];
+function renderClinical(){document.getElementById('clinicalList').innerHTML=clinicalData.map(c=>`<div class="card"><h3 class="section-title"><span class="section-key">${c.key}</span><span>${c.name.slice(3)}</span><span class="section-count" id="section_${c.key}">0/4 ข้อ</span></h3>`+c.items.map((q,i)=>`<div class="checkrow"><div>${i+1}. ${q}</div><div class="opts"><label class="choice"><input type="radio" name="${c.key}_${i}" value="1"> พร้อม</label><label class="choice"><input type="radio" name="${c.key}_${i}" value="0"> ยังไม่พร้อม</label><label class="choice"><input type="radio" name="${c.key}_${i}" value="NA"> N/A</label></div></div>`).join('')+'</div>').join('');document.querySelectorAll('#clinicalList input[type=radio]').forEach(x=>x.addEventListener('change',updateAll));restoreVisibleFromState();}
+const state={};
+function saveVisibleToState(){document.querySelectorAll('#clinicalList input[type=radio]:checked').forEach(x=>state[x.name]=x.value)}
+function restoreVisibleFromState(){document.querySelectorAll('#clinicalList input[type=radio]').forEach(x=>{if(state[x.name]===x.value)x.checked=true})}
+function collect(){saveVisibleToState();let yes=0,den=0,answered=0,miss=[],sections={};clinicalData.forEach(c=>{let sy=0,sd=0,sa=0; c.items.forEach((q,i)=>{const val=state[`${c.key}_${i}`];if(val!==undefined){sa++;answered++;if(val!=='NA'){sd++;den++;if(val==='1'){sy++;yes++;}else miss.push(`${c.key}: ${q}`)}}else{miss.push(`${c.key}: ยังไม่ได้ประเมิน – ${q}`)}});sections[c.key]={pct:sd?Math.round(sy/sd*100):0,answered:sa,total:c.items.length};});return{pct:den?Math.round(yes/den*100):0,answered,total:20,miss,sections};}
+function level(pct,answered){if(!answered)return['yellow','ยังไม่ได้ประเมิน'];if(pct>=85)return['green','พร้อมสำหรับการย้ายตามกระบวนการพยาบาล'];if(pct>=60)return['yellow','ควรเตรียมเพิ่มเติมก่อนย้าย'];return['red','ยังมีประเด็นสำคัญที่ควรจัดการก่อนย้าย'];}
+function dashboardHTML(r){const [cls]=level(r.pct,r.answered);let h=`<div class="metric overall ${cls}"><div class="label">Overall Readiness</div><div class="value">${r.pct}%</div><div class="mini">ประเมินแล้ว ${r.answered}/${r.total} ข้อ</div></div>`;clinicalData.forEach(c=>{const s=r.sections[c.key];const [sc]=level(s.pct,s.answered);h+=`<div class="metric ${sc}"><div class="label">${c.key}</div><div class="value">${s.pct}%</div><div class="mini">${s.answered}/${s.total} ข้อ</div></div>`});return h;}
+function updateAll(){saveVisibleToState();const r=collect();const [cls,text]=level(r.pct,r.answered);document.getElementById('score').textContent=r.pct+'%';document.getElementById('answered').textContent=`(${r.answered}/${r.total} ข้อ)`;document.getElementById('bar').style.width=r.pct+'%';document.getElementById('bar').style.background=cls==='green'?'var(--green)':cls==='yellow'?'var(--yellow)':'var(--red)';const st=document.getElementById('status');st.className='result '+cls;st.textContent=text;document.getElementById('dashboardLarge').innerHTML=dashboardHTML(r);const act=r.miss.filter(x=>!x.includes('ยังไม่ได้ประเมิน'));document.getElementById('actionsList').innerHTML=act.length?act.map(x=>`<li>${x}</li>`).join(''):'<li class="empty">ไม่มีประเด็น “ยังไม่พร้อม” ที่บันทึกไว้</li>';document.getElementById('dashboardActions').innerHTML=act.length?act.map(x=>`<li>${x}</li>`).join(''):'<li class="empty">ไม่มีประเด็น “ยังไม่พร้อม” ที่บันทึกไว้</li>';const di=document.getElementById('dashboardInterpretation');di.className='result '+cls;di.textContent=text;document.getElementById('dashPid').textContent=v('pid');document.getElementById('dashSurgery').textContent=v('surgery');document.getElementById('dashAssessDate').textContent=v('assessDate');document.getElementById('dashWard').textContent=v('ward');document.getElementById('dashNurse').textContent=v('nurseId');clinicalData.forEach(c=>{const el=document.getElementById('section_'+c.key);if(el)el.textContent=`${r.sections[c.key].answered}/4 ข้อ`;});makeSummary();}
+function v(id){return document.getElementById(id).value||'-'}
+function makeSummary(){const r=collect();const [,text]=level(r.pct,r.answered);const action=r.miss.filter(x=>!x.includes('ยังไม่ได้ประเมิน'));document.getElementById('summary').textContent=`CVT TRANSFER READY – REAL-TIME SUMMARY\n\nStudy ID: ${v('pid')}\nอายุ/เพศ: ${v('age')} / ${v('sex')}\nการผ่าตัด: ${v('surgery')}\nวันที่ผ่าตัด: ${v('surgeryDate')}\nวันที่ประเมิน: ${v('assessDate')}\nวันที่คาดว่าจะย้าย: ${v('transferDate')}\nหอผู้ป่วยปลายทาง: ${v('ward')}\nผู้ประเมิน: ${v('nurseId')}\n\nOverall Readiness: ${r.pct}% (${r.answered}/${r.total} ข้อ)\nR ${r.sections.R.pct}% | E ${r.sections.E.pct}% | A ${r.sections.A.pct}% | D ${r.sections.D.pct}% | Y ${r.sections.Y.pct}%\nสถานะ: ${text}\n\nประเด็นที่ต้องติดตาม:\n${action.length?action.map((x,i)=>`${i+1}. ${x}`).join('\n'):'ไม่มีประเด็น “ยังไม่พร้อม” ที่บันทึกไว้'}\n\nหมายเหตุ: Prototype นี้เป็นเครื่องมือสนับสนุนการประเมินและการส่งต่อทางการพยาบาล ไม่แทนการตัดสินใจทางคลินิก`}
+function resetAll(){if(confirm('ล้างข้อมูลการประเมินทั้งหมดหรือไม่')){Object.keys(state).forEach(k=>delete state[k]);document.querySelectorAll('input,select').forEach(el=>{if(el.type==='radio')el.checked=false;else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value=''});document.getElementById('assessDate').value=new Date().toISOString().slice(0,10);renderClinical();updateAll();}}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));document.getElementById(b.dataset.tab).classList.remove('hidden');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.tab==='summaryTab')makeSummary();if(b.dataset.tab==='researchDashboard')renderResearchDashboard();updateAll();}));
+document.getElementById('summaryBtn').addEventListener('click',()=>{document.querySelector('button[data-tab="summaryTab"]').click()});document.getElementById('refreshSummary').addEventListener('click',makeSummary);document.getElementById('printBtn').addEventListener('click',()=>window.print());document.getElementById('printSummary').addEventListener('click',()=>window.print());document.getElementById('resetBtn').addEventListener('click',resetAll);['pid','age','sex','surgery','surgeryDate','assessDate','transferDate','ward','nurseId'].forEach(id=>document.getElementById(id).addEventListener('input',updateAll));
+
+
+// ===============================
+// GOOGLE SHEETS / APPS SCRIPT API
+// ===============================
+// วาง URL ที่ได้จาก Deploy > New deployment > Web app ที่นี่
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzmsy6C-S-jMHN-4FELl1QNfr7Dd-gyrmy6Izi_2Ctkx_5D3C8s8qOERJkkcGFc4oPi/exec';
+
+let cachedRecords=[];
+let filteredRecords=[];
+let activePeriod='month';
+
+function escCsv(v){
+  const s=String(v??'');
+  return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);
+}
+function getStatusClass(pct){
+  if(pct>=85)return 'green';
+  if(pct>=60)return 'yellow';
+  return 'red';
+}
+function getStatusShort(pct){
+  if(pct>=85)return 'พร้อมย้าย';
+  if(pct>=60)return 'เตรียมเพิ่มเติม';
+  return 'ยังไม่พร้อม';
+}
+function apiReady(){
+  return SCRIPT_URL && !SCRIPT_URL.includes('PASTE_YOUR_');
+}
+async function apiRequest(action,payload={}){
+  if(!apiReady()){
+    throw new Error('ยังไม่ได้ตั้งค่า Apps Script URL');
+  }
+  const res=await fetch(SCRIPT_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action,...payload})
+  });
+  if(!res.ok) throw new Error('เชื่อมต่อฐานข้อมูลไม่สำเร็จ');
+  const data=await res.json();
+  if(!data.ok) throw new Error(data.error||'เกิดข้อผิดพลาดจากฐานข้อมูล');
+  return data;
+}
+async function saveCurrentRecord(){
+  saveVisibleToState();
+  const r=collect();
+  if(r.answered===0){alert('กรุณาประเมิน Clinical Checklist ก่อนบันทึกข้อมูล');return;}
+  if(r.answered<20){
+    const ok=confirm(`ประเมินแล้ว ${r.answered}/20 ข้อ ต้องการบันทึกข้อมูลนี้หรือไม่?`);
+    if(!ok)return;
+  }
+  const studyId=v('pid');
+  if(studyId==='-'){
+    const ok=confirm('ยังไม่ได้กรอก Study ID ต้องการบันทึกต่อหรือไม่?');
+    if(!ok)return;
+  }
+  const rec={
+    recordId:'REC-'+Date.now(),
+    pid:v('pid'),
+    age:v('age'),
+    sex:v('sex'),
+    surgery:v('surgery'),
+    surgeryDate:v('surgeryDate'),
+    assessDate:v('assessDate'),
+    transferDate:v('transferDate'),
+    ward:v('ward'),
+    nurseId:v('nurseId'),
+    overall:r.pct,
+    answered:r.answered,
+    R:r.sections.R.pct,E:r.sections.E.pct,A:r.sections.A.pct,D:r.sections.D.pct,Y:r.sections.Y.pct,
+    status:getStatusShort(r.pct),
+    savedAt:new Date().toISOString()
+  };
+  const btn=document.getElementById('saveRecordBtn');
+  const old=btn.textContent;
+  btn.disabled=true;btn.textContent='กำลังบันทึก...';
+  try{
+    const data=await apiRequest('save',{record:rec});
+    showToast(`บันทึกข้อมูลแล้ว • รวม ${data.total||''} ราย`);
+    await renderResearchDashboard();
+  }catch(e){
+    alert('บันทึกไม่สำเร็จ: '+e.message+'\n\nกรุณาตรวจ Apps Script URL และสิทธิ์การ Deploy');
+  }finally{
+    btn.disabled=false;btn.textContent=old;
+  }
+}
+async function renderResearchDashboard(){
+  const dash=document.getElementById('aggregateDashboard');
+  if(!apiReady()){
+    dash.innerHTML=`<div class="aggregate-card red" style="grid-column:1/-1"><div class="a-label">ยังไม่ได้เชื่อม Google Sheets</div><div class="mini">กรุณาใส่ Apps Script Web App URL ในตัวแปร SCRIPT_URL</div></div>`;
+    document.getElementById('recordsBody').innerHTML='';
+    document.getElementById('recordsEmpty').style.display='block';
+    document.getElementById('recordsEmpty').textContent='ยังไม่ได้ตั้งค่า Google Sheets / Apps Script';
+    document.getElementById('recordsTable').style.display='none';
+    return;
+  }
+  dash.innerHTML=`<div class="aggregate-card blue" style="grid-column:1/-1"><div class="a-label">กำลังโหลดข้อมูลจาก Google Sheets...</div></div>`;
+  try{
+    const data=await apiRequest('list');
+    cachedRecords=data.records||[];
+    applyResearchFilter();
+  }catch(e){
+    dash.innerHTML=`<div class="aggregate-card red" style="grid-column:1/-1"><div class="a-label">โหลดข้อมูลไม่สำเร็จ</div><div class="mini">${e.message}</div></div>`;
+  }
+}
+function recordDate(x){
+  const d=new Date(x.savedAt||x.assessDate||'');
+  return isNaN(d)?null:d;
+}
+function applyResearchFilter(){
+    const now=new Date();
+    const startToday=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const startMonth=new Date(now.getFullYear(),now.getMonth(),1);
+    const start7=new Date(startToday);start7.setDate(start7.getDate()-6);
+    filteredRecords=cachedRecords.filter(x=>{
+      if(activePeriod==='all')return true;
+      const d=recordDate(x);if(!d)return false;
+      if(activePeriod==='today')return d>=startToday;
+      if(activePeriod==='7days')return d>=start7;
+      return d>=startMonth;
+    });
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===activePeriod));
+    renderFilteredRecords();
+}
+function renderFilteredRecords(){
+    const records=filteredRecords;
+    const dash=document.getElementById('aggregateDashboard');
+    const total=records.length;
+    const green=records.filter(x=>Number(x.overall)>=85).length;
+    const yellow=records.filter(x=>Number(x.overall)>=60&&Number(x.overall)<85).length;
+    const red=records.filter(x=>Number(x.overall)<60).length;
+    const periodText={month:'เดือนนี้',today:'วันนี้','7days':'7 วันที่ผ่านมา',all:'ทั้งหมด'}[activePeriod];
+    dash.innerHTML=`
+      <div class="aggregate-card blue"><div class="a-label">ผู้ป่วยในช่วงที่เลือก</div><div class="a-value">${total}</div><div class="mini">${periodText}</div></div>
+      <div class="aggregate-card green"><div class="a-label">พร้อมย้าย ≥85%</div><div class="a-value">${green}</div><div class="mini">ราย</div></div>
+      <div class="aggregate-card yellow"><div class="a-label">เตรียมเพิ่มเติม 60–84%</div><div class="a-value">${yellow}</div><div class="mini">ราย</div></div>
+      <div class="aggregate-card red"><div class="a-label">ยังไม่พร้อม &lt;60%</div><div class="a-value">${red}</div><div class="mini">ราย</div></div>
+      <div class="aggregate-card"><div class="a-label">ช่วงเวลาที่แสดง</div><div class="a-value" style="font-size:18px">${periodText}</div><div class="mini">เปลี่ยนได้จากเมนูด้านบน</div></div>`;
+    const body=document.getElementById('recordsBody');
+    const empty=document.getElementById('recordsEmpty');
+    const table=document.getElementById('recordsTable');
+    if(!records.length){body.innerHTML='';empty.style.display='block';empty.textContent='ยังไม่มีข้อมูลที่บันทึก';table.style.display='none';return;}
+    empty.style.display='none';table.style.display='table';
+    body.innerHTML=records.slice().reverse().map((x,i)=>{
+      const cls=getStatusClass(Number(x.overall||0));
+      const saved=x.savedAt?new Date(x.savedAt).toLocaleString('th-TH'):'-';
+      return `<tr>
+        <td>${records.length-i}</td>
+        <td>${x.pid||'-'}</td>
+        <td>${x.assessDate||'-'}</td>
+        <td>${x.surgery||'-'}</td>
+        <td><b>${x.overall}%</b></td>
+        <td>${x.R}%</td><td>${x.E}%</td><td>${x.A}%</td><td>${x.D}%</td><td>${x.Y}%</td>
+        <td><span class="badge-status ${cls}">${x.status||getStatusShort(Number(x.overall||0))}</span></td>
+        <td>${x.nurseId||'-'}</td>
+        <td>${saved}</td>
+        <td><button class="small-btn danger" onclick="deleteRecord('${x.recordId}')">ลบ</button></td>
+      </tr>`;
+    }).join('');
+}
+async function deleteRecord(id){
+  if(!confirm('ต้องการลบข้อมูลรายการนี้ออกจาก Google Sheet หรือไม่?'))return;
+  try{
+    await apiRequest('delete',{recordId:id});
+    showToast('ลบข้อมูลแล้ว');
+    await renderResearchDashboard();
+  }catch(e){alert('ลบไม่สำเร็จ: '+e.message);}
+}
+function exportCsv(){
+  const records=filteredRecords||[];
+  if(!records.length){alert('ยังไม่มีข้อมูลสำหรับดาวน์โหลด หรือกรุณากดรีเฟรช Dashboard ก่อน');return;}
+  const headers=['Record ID','Study ID','Age','Sex','Surgery','Surgery Date','Assessment Date','Expected Transfer Date','Ward','Nurse ID','Overall','Answered','R','E','A','D','Y','Status','Saved At'];
+  const rows=records.map(x=>[x.recordId,x.pid,x.age,x.sex,x.surgery,x.surgeryDate,x.assessDate,x.transferDate,x.ward,x.nurseId,x.overall,x.answered,x.R,x.E,x.A,x.D,x.Y,x.status,x.savedAt]);
+  const csv='\uFEFF'+[headers,...rows].map(row=>row.map(escCsv).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='CVT_Transfer_Ready_Data.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+document.getElementById('saveRecordBtn').addEventListener('click',saveCurrentRecord);
+document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
+document.getElementById('refreshRecordsBtn').addEventListener('click',renderResearchDashboard);
+document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>{activePeriod=b.dataset.period;applyResearchFilter();}));
+
+
+document.getElementById('assessDate').value=new Date().toISOString().slice(0,10);renderClinical();updateAll();
+renderResearchDashboard();
+</script>
+</body></html>
